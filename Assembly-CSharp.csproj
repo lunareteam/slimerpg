@@ -65,6 +65,8 @@
     <Compile Include="Assets\Scripts\HideLayer.cs" />
     <Compile Include="Assets\Scripts\movement.cs" />
     <Compile Include="Assets\Scripts\Quit.cs" />
+    <Compile Include="Assets\Scripts\spritemove.cs" />
+    <Compile Include="Assets\Scripts\spritemovechg.cs" />
     <Compile Include="Assets\Scripts\StartHide.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/marc/slimerpg/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

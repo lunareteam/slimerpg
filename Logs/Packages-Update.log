@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 === Mon Oct 14 16:02:16 2019
 
 Packages were changed.
@@ -8,6 +9,9 @@ The following packages were updated:
   com.unity.package-manager-ui from version 2.0.7 to 2.0.8
 
 === Wed Oct 23 21:52:32 2019
+=======
+=== Thu Oct 31 22:28:17 2019
+>>>>>>> 1f7ed61a8f00cd0be99c2be28513d0eb978e8ab3
 
 Packages were changed.
 Update Mode: updateDependencies

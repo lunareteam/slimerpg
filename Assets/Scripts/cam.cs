@@ -43,5 +43,6 @@ public class cam : MonoBehaviour
             this.transform.position = new Vector2(oldx, this.transform.position.y);
         if(flagy)
             this.transform.position = new Vector2(this.transform.position.x, oldy);
+
     }
 }
