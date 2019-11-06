@@ -11,7 +11,7 @@ public class cam : MonoBehaviour
     Vector3 objPosition;
     
     void Start()
-    {
+    { 
         path = GameObject.FindGameObjectsWithTag("path");
     }
   
@@ -43,6 +43,6 @@ public class cam : MonoBehaviour
             this.transform.position = new Vector2(oldx, this.transform.position.y);
         if(flagy)
             this.transform.position = new Vector2(this.transform.position.x, oldy);
-
+        this.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, -10);
     }
 }

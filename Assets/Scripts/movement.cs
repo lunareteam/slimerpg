@@ -9,7 +9,10 @@ public class movement : MonoBehaviour
     [SerializeField] float vel;
     [SerializeField] Camera mapacamera;
 
-
+    public Transform getplayer()
+    {
+        return player.transform;
+    }
     Vector3 fa ;
 
     void Start()
@@ -31,6 +34,7 @@ public class movement : MonoBehaviour
         
     }
     // Update is called once per fram
+   
     void Update()
     {
 
