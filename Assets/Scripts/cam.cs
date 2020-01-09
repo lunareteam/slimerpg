@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class cam : MonoBehaviour
+public class Cam : MonoBehaviour
 {
     // Start is called before the first frame update
     [SerializeField] GameObject player;
