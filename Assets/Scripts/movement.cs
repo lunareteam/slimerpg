@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
-{
-    [SerializeField] Transform player;
+{ 
+    [SerializeField] GameObject player;
     [SerializeField] float vel;
+    public LayerMask bgLayer;
     Vector3 mousePosition;
     bool clickedOnce = false;
 
@@ -13,6 +14,7 @@ public class Movement : MonoBehaviour
     void Start()
     {
         Debug.Log("Move Initiate");
+        player.GetComponent<Animator>().SetBool("move", false);
     }
 
     // Update is called once per frame
@@ -20,8 +22,17 @@ public class Movement : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) || clickedOnce)
         {
-            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, 10f));
-            clickedOnce = true;
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            Debug.Log("Click on " + hit.collider.tag);
+            
+            if (hit.collider.tag == "Background")
+            {               
+                if(hit.collider.tag == "Background")
+                {
+                    mousePosition = hit.point;
+                    clickedOnce = true;
+                }
+            }
         }
 
         if (Input.GetMouseButtonUp(0))
@@ -29,10 +40,19 @@ public class Movement : MonoBehaviour
             clickedOnce = false;
         }
 
-        player.position = Vector3.MoveTowards(player.position, mousePosition, vel);
-        if (player.position.z != -10 && clickedOnce)
+        player.GetComponent<Transform>().position = Vector3.MoveTowards(player.GetComponent<Transform>().position, mousePosition, vel);
+        if (player.GetComponent<Transform>().position.z != -1 && clickedOnce)
+        {            
+            player.GetComponent<Transform>().position = new Vector3(player.GetComponent<Transform>().position.x, player.GetComponent<Transform>().position.y, 1);
+        }
+
+        if(player.GetComponent<Transform>().position != mousePosition)
         {
-            player.position = new Vector3(player.position.x, player.position.y, 10);
-        }     
+            player.GetComponent<Animator>().SetBool("move", true);
+        }
+        else
+        {
+            player.GetComponent<Animator>().SetBool("move", false);
+        }
     }
 }
