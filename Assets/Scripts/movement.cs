@@ -2,47 +2,57 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class movement : MonoBehaviour
-{
-    // Start is called before the first frame update
+public class Movement : MonoBehaviour
+{ 
     [SerializeField] GameObject player;
     [SerializeField] float vel;
-    [SerializeField] Camera mapacamera;
+    public LayerMask bgLayer;
+    Vector3 mousePosition;
+    bool clickedOnce = false;
 
-    public Transform getplayer()
-    {
-        return player.transform;
-    }
-    Vector3 fa ;
-
+    // Start is called before the first frame update
     void Start()
     {
-        
+        Debug.Log("Move Initiate");
+        player.GetComponent<Animator>().SetBool("move", false);
     }
 
-    void OnMouseDrag()
-    {
-        Vector2 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y,10);
-        fa = new Vector3(mapacamera.ScreenToWorldPoint(mousePosition).x, mapacamera.ScreenToWorldPoint(mousePosition).y, 10);
-        
-    }
-    void OnMouseClick()
-    {
-        Vector2 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y,10);
-        fa = new Vector3(mapacamera.ScreenToWorldPoint(mousePosition).x, mapacamera.ScreenToWorldPoint(mousePosition).y, 10);
-
-        
-    }
-    // Update is called once per fram
-   
+    // Update is called once per frame
     void Update()
     {
-
-        player.transform.position = Vector3.MoveTowards(player.transform.position, fa, vel);
-        if (player.transform.position.z != 10)
+        if (Input.GetMouseButtonDown(0) || clickedOnce)
         {
-            player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, 10); 
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            Debug.Log("Click on " + hit.collider.tag);
+            
+            if (hit.collider.tag == "Background")
+            {               
+                if(hit.collider.tag == "Background")
+                {
+                    mousePosition = hit.point;
+                    clickedOnce = true;
+                }
+            }
         }
 
+        if (Input.GetMouseButtonUp(0))
+        {
+            clickedOnce = false;
+        }
+
+        player.GetComponent<Transform>().position = Vector3.MoveTowards(player.GetComponent<Transform>().position, mousePosition, vel);
+        if (player.GetComponent<Transform>().position.z != -1 && clickedOnce)
+        {            
+            player.GetComponent<Transform>().position = new Vector3(player.GetComponent<Transform>().position.x, player.GetComponent<Transform>().position.y, 1);
+        }
+
+        if(player.GetComponent<Transform>().position != mousePosition)
+        {
+            player.GetComponent<Animator>().SetBool("move", true);
+        }
+        else
+        {
+            player.GetComponent<Animator>().SetBool("move", false);
+        }
     }
 }
