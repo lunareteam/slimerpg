@@ -26,12 +26,13 @@ public class Movement : MonoBehaviour
             Debug.Log("Click on " + hit.collider.tag);
             
             if (hit.collider.tag == "Background")
-            {               
-                if(hit.collider.tag == "Background")
-                {
-                    mousePosition = hit.point;
-                    clickedOnce = true;
-                }
+            {
+                mousePosition = hit.point;
+                clickedOnce = true;
+            }
+            else
+            {
+                clickedOnce = false;
             }
         }
 
