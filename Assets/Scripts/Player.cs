@@ -1,24 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 using System;
+using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    int life;
-    int baseLife;
-    int lifeRecover;
-    int mana;
-    int baseMana;
-    int manaRecover;
-    int exp;
-    int nlvl;
-    [SerializeField] Text health;
-    [SerializeField] Text magic;
-    [SerializeField] Text experience;
+    // Variables
+    private int life;
+    private int baseLife;
+    private int lifeRecover;
+    private int mana;
+    private int baseMana;
+    private int manaRecover;
+    private int exp;
+    private int nlvl;
 
-    // Start is called before the first frame update
+    // Start is called when object is spawned
     void Start()
     {
         this.GetComponent<Animator>().SetBool("move", false);
@@ -35,24 +32,21 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        recover();
-        health.text = life + "%";
-        magic.text = mana + "%";
-        experience.text = exp + "/" + nlvl + "XP";
+        Recover();
     }
-
-    void addExp(int addedExp)
+    
+    // Triggered
+    void OnTriggerEnter(Collider other)
     {
-        exp += addedExp;
-        if (exp > nlvl)
+        // If collides with enemy, life goes down by damage from enemy
+        if (other.gameObject.tag == "enemy")
         {
-            life = baseLife;
-            mana = baseMana;
-            nlvl += (int)Math.Ceiling(nlvl * 0.4);
+            life -= other.gameObject.GetComponent<Enemy>().GetDamage();
         }
     }
 
-    void recover()
+    // Functions
+    void Recover()
     {
         if (life < baseLife)
         {
@@ -78,11 +72,46 @@ public class Player : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    // Getters
+    public int GetLife()
     {
-        if (other.gameObject.tag == "enemy")
+        return life;
+    }
+
+    public int GetMana()
+    {
+        return mana;
+    }
+
+    public int GetExp()
+    {
+        return exp;
+    }
+
+    public int GetNLVL()
+    {
+        return nlvl;
+    }
+
+    // Setters
+    public void AddExp(int addedExp)
+    {
+        // Should show gained exp on screen
+        /**** Not Implemented ****/
+        // Add exp to player
+        exp += addedExp;
+        if (exp >= nlvl)
         {
-            //life -= other.gameObject.damage;
+            // Base param
+            baseLife += (int)Math.Ceiling(baseLife*0.2);
+            baseMana += (int)Math.Ceiling(baseMana*0.2);
+
+            // Recover params
+            life = baseLife;
+            mana = baseMana;
+
+            // New lvlup requirement
+            nlvl += (int)Math.Ceiling(nlvl * 0.4);
         }
     }
 }

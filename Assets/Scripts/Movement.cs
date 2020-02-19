@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 { 
-    [SerializeField] GameObject player;
+    [SerializeField] Transform player;
     [SerializeField] float vel;
     public LayerMask bgLayer;
     Vector3 mousePosition;
@@ -16,7 +16,7 @@ public class Movement : MonoBehaviour
     void Start()
     {
         Debug.Log("Move Initiate");
-        player.GetComponent<Animator>().SetBool("move", false);
+        player.gameObject.GetComponent<Animator>().SetBool("move", false);
     }
 
     // Update is called once per frame
@@ -33,7 +33,7 @@ public class Movement : MonoBehaviour
             if (hit.collider.tag == "Background")
             {
                 trueMousePosition = hit.point;
-                mousePosition = new Vector3(hit.point.x, hit.point.y, player.GetComponent<Transform>().position.z);
+                mousePosition = new Vector3(hit.point.x, hit.point.y, player.position.z);
                 clickedOnce = true;
             }
             else
@@ -47,22 +47,22 @@ public class Movement : MonoBehaviour
             clickedOnce = false;
         }
 
-        player.GetComponent<Transform>().position = Vector3.MoveTowards(player.GetComponent<Transform>().position, mousePosition, vel);
-        Vector3 newPos = new Vector3(player.GetComponent<Transform>().position.x, player.GetComponent<Transform>().position.y, trueMousePosition.z - 20);
-        player.GetComponent<Transform>().position = Vector3.MoveTowards(player.GetComponent<Transform>().position, newPos, vel);
-        if (player.GetComponent<Transform>().position.z != -1 && clickedOnce)
+        player.position = Vector3.MoveTowards(player.position, mousePosition, vel);
+        Vector3 newPos = new Vector3(player.position.x, player.position.y, trueMousePosition.z - 20);
+        player.position = Vector3.MoveTowards(player.position, newPos, vel);
+        if (player.position.z != -1 && clickedOnce)
         {            
-            player.GetComponent<Transform>().position = new Vector3(player.GetComponent<Transform>().position.x, player.GetComponent<Transform>().position.y, player.GetComponent<Transform>().position.z);
-            player.GetComponent<Transform>().position = new Vector3(player.GetComponent<Transform>().position.x, player.GetComponent<Transform>().position.y, trueMousePosition.z - 20);
+            player.position = new Vector3(player.position.x, player.position.y, player.position.z);
+            player.position = new Vector3(player.position.x, player.position.y, trueMousePosition.z - 20);
         }
 
-        if(player.GetComponent<Transform>().position != new Vector3(trueMousePosition.x, trueMousePosition.y, trueMousePosition.z - 20))
+        if(player.position != new Vector3(trueMousePosition.x, trueMousePosition.y, trueMousePosition.z - 20))
         {
-            player.GetComponent<Animator>().SetBool("move", true);
+            player.gameObject.GetComponent<Animator>().SetBool("move", true);
         }
         else
         {
-            player.GetComponent<Animator>().SetBool("move", false);
+            player.gameObject.GetComponent<Animator>().SetBool("move", false);
         }
     }
 }
