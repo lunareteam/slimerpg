@@ -10,6 +10,11 @@ public class ResizeHUD : MonoBehaviour
 
     void Start()
     {
+        // Resize hub container to screen size
+        RectTransform hud = transform.parent.gameObject.GetComponent<RectTransform>();
+        transform.gameObject.GetComponent<RectTransform>().sizeDelta = hud.sizeDelta;
+
+        // Resize objects in hud
         ui = new GameObject[] {
             transform.Find("Health").gameObject,
             transform.Find("Mana").gameObject,
