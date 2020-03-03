@@ -7,16 +7,14 @@ public class Movement : MonoBehaviour
     [SerializeField] Transform player;
     [SerializeField] float vel;
     public LayerMask bgLayer;
-    Vector3 mousePosition;
-    Vector3 trueMousePosition;
-    float mousePositionZ;
-    bool clickedOnce = false;
+    private Vector3 mousePosition;
+    private Vector3 trueMousePosition;
+    private bool clickedOnce = false;
 
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Move Initiate");
-        player.gameObject.GetComponent<Animator>().SetBool("move", false);
     }
 
     // Update is called once per frame
@@ -47,6 +45,11 @@ public class Movement : MonoBehaviour
             clickedOnce = false;
         }
 
+        MovePlayer();
+        MoveSprite(new Vector2(trueMousePosition.x,trueMousePosition.y)); // Possibly make position private
+    }
+
+    private void MovePlayer(){
         player.position = Vector3.MoveTowards(player.position, mousePosition, vel);
         Vector3 newPos = new Vector3(player.position.x, player.position.y, trueMousePosition.z - 20);
         player.position = Vector3.MoveTowards(player.position, newPos, vel);
@@ -55,8 +58,11 @@ public class Movement : MonoBehaviour
             player.position = new Vector3(player.position.x, player.position.y, player.position.z);
             player.position = new Vector3(player.position.x, player.position.y, trueMousePosition.z - 20);
         }
+    }
 
-        if(player.position != new Vector3(trueMousePosition.x, trueMousePosition.y, trueMousePosition.z - 20))
+    private void MoveSprite(Vector2 mousePos){
+        Vector2 player2D = new Vector2(player.position.x, player.position.y);
+        if(player2D != mousePos)
         {
             player.gameObject.GetComponent<Animator>().SetBool("move", true);
         }
