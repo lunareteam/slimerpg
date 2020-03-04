@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class Movement : RaycastController
 {
-    [SerializeField] float vel;
-    [SerializeField] Vector3 playerVelocity;
+    private Animator animator;
+
+    [SerializeField]
+    float vel;
+    [SerializeField]
+    [Tooltip("This value should be a positive integer")]
+    float mouseOffsetZ = 20;
+    
     private Vector3 mousePosition;
     private Vector3 trueMousePosition;
     private bool clickedOnce = false;
@@ -15,6 +21,8 @@ public class Movement : RaycastController
     // Start is called before the first frame update
     void Start()
     {
+        trueMousePosition = player.position;
+        animator = player.GetComponent<Animator>();
         base.Awake();
     }
 
@@ -24,75 +32,58 @@ public class Movement : RaycastController
         if (Input.GetMouseButton(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Debug.Log(ray.ToString());
-            Debug.DrawRay(ray.origin, ray.direction * 10, Color.yellow);
             RaycastHit hit;
             Physics.Raycast(ray, out hit, Mathf.Infinity);
-            Debug.Log(hit.collider);
             trueMousePosition = hit.point;
 
             mousePosition = new Vector3(hit.point.x, hit.point.y, player.position.z);
-            Debug.Log(mousePosition);
             clickedOnce = true;
         }
 
-        if (Vector3.Distance(mousePosition, player.position) < vel)
+        Vector3 newPos = new Vector3(player.position.x, player.position.y, trueMousePosition.z - mouseOffsetZ);
+
+        if (Input.GetMouseButtonUp(0))
         {
             clickedOnce = false;
         }
 
         Vector2 mousePos2D = new Vector2(trueMousePosition.x, trueMousePosition.y);
 
-        MovePlayer(mousePos2D);
+        MovePlayer();
         MoveSprite(); // Possibly make position private
     }
 
-    private void MovePlayer(Vector2 mousePos)
+    private void MovePlayer()
     {
         UpdateRaycastOrigins();
         collisions.Reset();
         
-        // Calculate angle
-        Vector2 newCoordSysPos = new Vector2(mousePos.x - player.transform.position.x,
-        mousePos.y - player.transform.position.y);
-        float angle = Mathf.Deg2Rad * Vector2.Angle(Vector2.right, newCoordSysPos);
-        
-        // Full 360 degrees
-        if ((mousePos.y < player.position.y) || (mousePos.y == player.position.y &&
-        mousePos.x < player.position.x))
-        {
-            angle *= -1;
+        Vector3 movePoint = mousePosition;
+
+        if (movePoint.x != player.position.x) {
+            HorizontalCollisions(ref movePoint);
         }
 
-        float velX = clickedOnce ? Mathf.Cos(angle) * vel : 0f;
-        float velY = clickedOnce ? Mathf.Sin(angle) * vel : 0f;
-        Vector3 velocity = new Vector3(velX, velY, 0f);
-        playerVelocity = velocity;
-
-        // Visual debug
-        Vector2 rayOrigin = raycastOrigins.bottomLeft;
-        Debug.DrawRay(rayOrigin, Vector2.right * velX * 10f, Color.blue);
-        Debug.DrawRay(rayOrigin, Vector2.up * velY * 10f, Color.red);
-        playerVelocity = velocity;
-        
-        collisions.velocityOld = velocity;
-
-        if (velocity.x != 0f) {
-            HorizontalCollisions(ref velocity);
+        if (movePoint.y != player.position.y) {
+            VerticalCollisions(ref movePoint);
         }
 
-        if (velocity.y != 0f) {
-            VerticalCollisions(ref velocity);
-        }
+        // XY velocity
+        // Almost the same as player.Translate(velocity);
+        player.position = Vector3.MoveTowards(player.position, movePoint, vel);
+        mousePosition = movePoint;
 
-        player.Translate(velocity);
+        // Z velocity
+        movePoint = new Vector3(player.position.x, player.position.y, trueMousePosition.z - mouseOffsetZ);
+        player.position = Vector3.MoveTowards(player.position, movePoint, vel);
     }
 
-    public void HorizontalCollisions(ref Vector3 velocity) 
+    public void HorizontalCollisions(ref Vector3 movePoint) 
     {
-        float directionX = Mathf.Sign(velocity.x);
-		float rayLength = Mathf.Abs(velocity.x) + skinWidth;
-		
+        float distance = mousePosition.x - player.position.x;
+        float directionX = Mathf.Sign(distance);
+		float rayLength = Mathf.Abs(distance) + skinWidth;
+
 		for (int i = 0; i < horizontalRayCount; i ++) {
 			Vector2 rayOrigin = (directionX == -1) ? raycastOrigins.bottomLeft :
             raycastOrigins.bottomRight;
@@ -102,46 +93,83 @@ public class Movement : RaycastController
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX,
             rayLength, collisionMask);
 
-			Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.white);
+			Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.red);
 
 			if (hit) {
                 Debug.Log("Horizontal hit");
-                velocity.x = (hit.distance - skinWidth) * directionX;
                 rayLength = hit.distance;
 
                 collisions.left = (directionX == -1);
                 collisions.right = (directionX == 1);
-			}
+
+                Bounds bounds = playerCollider.bounds;
+                float hitPoint = hit.point.x - (skinWidth + bounds.extents.x) * directionX;
+
+                if (directionX == 1)
+                {
+                    if (hitPoint < movePoint.x)
+                    {
+                        movePoint.x =  hitPoint;
+                    }
+                }
+                else if (directionX == -1)
+                {
+                    if (hitPoint > movePoint.x)
+                    {
+                        movePoint.x = hitPoint;
+                    }
+                }
+            }
 		}
 	}
 
-    public void VerticalCollisions(ref Vector3 velocity) 
+    public void VerticalCollisions(ref Vector3 movePoint)
     {
-		float directionY = Mathf.Sign(velocity.y);
-		float rayLength = Mathf.Abs(velocity.y) + skinWidth;
+        float distanceX = mousePosition.x - player.position.x;
+        float directionX = Mathf.Sign(distanceX);
+        float distanceY = mousePosition.y - player.position.y;
+		float directionY = Mathf.Sign(distanceY);
+		float rayLength = Mathf.Abs(distanceY) + skinWidth;
 
 		for (int i = 0; i < verticalRayCount; i ++) {
 			Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : 
                 raycastOrigins.topLeft;
-			rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
+			rayOrigin += Vector2.right * (verticalRaySpacing * i);
 			RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY,
                 rayLength, collisionMask);
 
 			Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.white);
 
 			if (hit) {
-				velocity.y = (hit.distance - skinWidth) * directionY;
+                Debug.Log("Vertical hit");
                 rayLength = hit.distance;
 
                 collisions.below = (directionY == -1);
                 collisions.above = (directionY == 1);
-			}
+
+                Bounds bounds = playerCollider.bounds;
+                float hitPoint = hit.point.y - (skinWidth + bounds.extents.y) * directionY;
+
+                if (directionY == 1)
+                {
+                    if (hitPoint < movePoint.y)
+                    {
+                        movePoint.y =  hitPoint;
+                    }
+                }
+                else if (directionY == -1)
+                {
+                    if (hitPoint > movePoint.y)
+                    {
+                        movePoint.y =  hitPoint;
+                    }
+                }
+            }
 		}
 	}
 
     private void MoveSprite(){
-        Animator animator = player.GetComponent<Animator>();
-        if(playerVelocity != Vector3.zero)
+        if(player.position != mousePosition)
         {
             animator.SetBool("move", true);
         }
@@ -155,8 +183,6 @@ public class Movement : RaycastController
     {
         public bool above, below;
         public bool left, right;
-        
-        public Vector3 velocityOld;
 
         public void Reset() {
             above = below = false;
