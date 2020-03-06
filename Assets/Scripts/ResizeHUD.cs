@@ -7,9 +7,17 @@ public class ResizeHUD : MonoBehaviour
     private GameObject[] ui;
     private BoxCollider2D[] boxColliders;
     private RectTransform[] rectTransforms;
+    private RectTransform canvasTransform;
+    private RectTransform hudTransform;
+
 
     void Start()
     {
+        // Get hud container transform
+        canvasTransform = transform.parent.gameObject.GetComponent<RectTransform>();
+        hudTransform = transform.gameObject.GetComponent<RectTransform>();
+
+        // Resize objects in hud
         ui = new GameObject[] {
             transform.Find("Health").gameObject,
             transform.Find("Mana").gameObject,
@@ -35,6 +43,7 @@ public class ResizeHUD : MonoBehaviour
 
     void Update()
     {        
+        hudTransform.sizeDelta = canvasTransform.sizeDelta;
         foreach (BoxCollider2D collider in boxColliders)
         {
             collider.offset = new Vector2(1, 1);
